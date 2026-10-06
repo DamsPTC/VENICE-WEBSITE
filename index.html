@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VENICE — Marché caché</title>
+<meta name="robots" content="noindex">
+<style>
+  :root{
+    --bg:#07090d;
+    --panel:#0e1118;
+    --card:#12151d;
+    --card-hover:#171b26;
+    --line:rgba(255,255,255,.07);
+    --txt:#e8eaf0;
+    --muted:#8b93a7;
+    --acc1:#8b5cf6;
+    --acc2:#22d3ee;
+    --ok:#3ddc84;
+    --warn:#f5b944;
+    --bad:#f45b69;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg);
+    background-image:
+      radial-gradient(1200px 500px at 15% -10%, rgba(139,92,246,.14), transparent 60%),
+      radial-gradient(1000px 400px at 85% -5%, rgba(34,211,238,.10), transparent 60%);
+    color:var(--txt);
+    font-family:'Segoe UI',system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;
+    min-height:100vh;
+  }
+  a{color:inherit;text-decoration:none}
+
+  /* ── ticker ─────────────────────────────── */
+  .ticker{overflow:hidden;background:#0a0d13;border-bottom:1px solid var(--line);height:34px;display:flex;align-items:center}
+  .ticker-inner{display:flex;white-space:nowrap;animation:tick 40s linear infinite}
+  .ticker span{padding:0 34px;font-size:12px;letter-spacing:.4px;color:var(--muted)}
+  .ticker b{color:var(--acc2);font-weight:600}
+  .ticker .ok{color:var(--ok)}
+  @keyframes tick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+  /* ── header ─────────────────────────────── */
+  header{position:sticky;top:0;z-index:50;background:rgba(10,12,17,.8);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+  .nav{max-width:1280px;margin:0 auto;padding:14px 24px;display:flex;align-items:center;gap:26px}
+  .logo{display:flex;align-items:center;gap:11px;font-size:21px;font-weight:800;letter-spacing:3px}
+  .logo-mark{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--acc1),var(--acc2));display:grid;place-items:center;font-size:17px;box-shadow:0 0 22px rgba(139,92,246,.45)}
+  .logo small{font-size:9px;letter-spacing:2.5px;color:var(--muted);font-weight:500;display:block;margin-top:1px}
+  nav.menu{display:flex;gap:4px}
+  nav.menu a{padding:8px 13px;border-radius:9px;font-size:13.5px;color:var(--muted);transition:.18s}
+  nav.menu a:hover,nav.menu a.on{color:var(--txt);background:rgba(255,255,255,.06)}
+  .search{flex:1;max-width:430px;margin-left:auto;position:relative}
+  .search input{width:100%;background:#0a0d13;border:1px solid var(--line);border-radius:11px;padding:10px 14px 10px 38px;color:var(--txt);font-size:13px;outline:none;transition:.18s}
+  .search input:focus{border-color:rgba(139,92,246,.6);box-shadow:0 0 0 3px rgba(139,92,246,.12)}
+  .search::before{content:'⌕';position:absolute;left:13px;top:9px;font-size:16px;color:var(--muted)}
+  .iconbtn{position:relative;width:40px;height:40px;border-radius:11px;border:1px solid var(--line);background:#0a0d13;display:grid;place-items:center;cursor:pointer;font-size:16px;transition:.18s}
+  .iconbtn:hover{border-color:rgba(139,92,246,.5);transform:translateY(-1px)}
+  .iconbtn .dot{position:absolute;top:8px;right:9px;width:8px;height:8px;border-radius:50%;background:var(--acc1);box-shadow:0 0 8px var(--acc1)}
+  .cartbtn{position:relative;font-size:16px}
+  #cartcount{position:absolute;top:-6px;right:-6px;min-width:19px;height:19px;padding:0 5px;border-radius:10px;background:linear-gradient(135deg,var(--acc1),var(--acc2));font-size:11px;font-weight:700;display:grid;place-items:center}
+  .avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#2b3350,#12151d);border:1px solid var(--line);display:grid;place-items:center;font-size:13px;font-weight:700;color:var(--acc2);cursor:pointer}
+
+  /* ── hero ───────────────────────────────── */
+  .hero{max-width:1280px;margin:0 auto;padding:52px 24px 8px}
+  .hero h1{font-size:clamp(28px,4vw,44px);font-weight:800;letter-spacing:-.5px;line-height:1.12}
+  .hero h1 em{font-style:normal;background:linear-gradient(90deg,var(--acc1),var(--acc2));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero p{margin-top:12px;color:var(--muted);font-size:15px;max-width:640px;line-height:1.65}
+  .stats{display:flex;flex-wrap:wrap;gap:14px;margin-top:28px}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 22px;display:flex;align-items:center;gap:14px;flex:1;min-width:180px}
+  .stat .k{font-size:21px;font-weight:800}
+  .stat .k small{font-size:12px;color:var(--muted);font-weight:500;display:block;margin-top:2px}
+  .live{width:9px;height:9px;border-radius:50%;background:var(--ok);animation:pulse 1.6s infinite}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(61,220,132,.5)}50%{box-shadow:0 0 0 8px rgba(61,220,132,0)}}
+
+  /* ── chips ──────────────────────────────── */
+  .chips{max-width:1280px;margin:0 auto;padding:30px 24px 6px;display:flex;gap:9px;flex-wrap:wrap}
+  .chip{padding:8px 16px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--muted);font-size:13px;cursor:pointer;transition:.18s}
+  .chip:hover{color:var(--txt);border-color:rgba(255,255,255,.2)}
+  .chip.on{background:linear-gradient(135deg,rgba(139,92,246,.22),rgba(34,211,238,.18));border-color:rgba(139,92,246,.55);color:#fff}
+
+  /* ── grid ───────────────────────────────── */
+  .grid{max-width:1280px;margin:0 auto;padding:20px 24px 60px;display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:18px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:17px;overflow:hidden;cursor:pointer;transition:.22s;position:relative;display:flex;flex-direction:column}
+  .card:hover{transform:translateY(-4px);background:var(--card-hover);border-color:rgba(139,92,246,.4);box-shadow:0 14px 34px rgba(0,0,0,.5),0 0 0 1px rgba(139,92,246,.15)}
+  .thumb{height:158px;display:grid;place-items:center;font-size:58px;position:relative}
+  .thumb .tag{position:absolute;top:11px;left:11px;font-size:10px;letter-spacing:1px;padding:4px 9px;border-radius:7px;background:rgba(0,0,0,.5);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.14);color:#cfd4e4}
+  .thumb .fav{position:absolute;top:10px;right:11px;font-size:15px;opacity:.55;transition:.18s}
+  .card:hover .fav{opacity:1}
+  .g-cann{background:linear-gradient(150deg,#12301f,#0b130e 70%)}
+  .g-mdma{background:linear-gradient(150deg,#2c1a4e,#0d0a18 70%)}
+  .g-lsd{background:linear-gradient(150deg,#3d1440,#120814 70%)}
+  .g-psy{background:linear-gradient(150deg,#0f3540,#081013 70%)}
+  .g-stim{background:linear-gradient(150deg,#122c4e,#090d16 70%)}
+  .g-dep{background:linear-gradient(150deg,#3a1626,#12080c 70%)}
+  .g-diss{background:linear-gradient(150deg,#33230f,#0f0b07 70%)}
+  .body{padding:15px 16px 16px;display:flex;flex-direction:column;flex:1}
+  .ttl{font-size:14.5px;font-weight:700;display:flex;align-items:center;gap:7px}
+  .vf{color:var(--ok);font-size:12px}
+  .vendor{margin-top:3px;font-size:12px;color:var(--muted)}
+  .rating{margin-top:9px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted)}
+  .stars{color:var(--warn);letter-spacing:1.5px;font-size:12.5px}
+  .foot{margin-top:14px;padding-top:13px;border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .price{font-size:15.5px;font-weight:800}
+  .price small{display:block;font-size:10.5px;color:var(--muted);font-weight:500;margin-top:2px}
+  .buy{background:linear-gradient(135deg,var(--acc1),var(--acc2));border:none;color:#fff;font-weight:700;font-size:12.5px;padding:9px 15px;border-radius:10px;cursor:pointer;transition:.18s;white-space:nowrap}
+  .buy:hover{filter:brightness(1.18);box-shadow:0 4px 18px rgba(139,92,246,.4)}
+
+  /* ── footer ─────────────────────────────── */
+  footer{border-top:1px solid var(--line);background:#080a0f}
+  .fwrap{max-width:1280px;margin:0 auto;padding:40px 24px;display:flex;flex-wrap:wrap;gap:34px}
+  .fcol{flex:1;min-width:200px}
+  .fcol h4{font-size:12px;letter-spacing:1.6px;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+  .fcol a{display:block;font-size:13px;color:#aab1c4;padding:5px 0;transition:.15s}
+  .fcol a:hover{color:var(--acc2)}
+  .pay{display:flex;gap:8px;flex-wrap:wrap}
+  .pay span{font-size:11px;padding:5px 11px;border-radius:8px;border:1px solid var(--line);background:#0d1017;color:#aab1c4}
+  .disc{margin-top:14px;font-size:11px;color:#5b6377;line-height:1.7;max-width:520px}
+  .fbottom{border-top:1px solid var(--line);padding:16px 24px;text-align:center;font-size:11.5px;color:#5b6377;max-width:1280px;margin:0 auto}
+
+  /* ── toast ──────────────────────────────── */
+  #toast{position:fixed;bottom:26px;left:50%;transform:translate(-50%,80px);background:#141926;border:1px solid rgba(61,220,132,.5);border-radius:12px;padding:13px 22px;font-size:13.5px;display:flex;gap:10px;align-items:center;transition:.3s cubic-bezier(.2,.9,.3,1.2);opacity:0;z-index:99;box-shadow:0 12px 40px rgba(0,0,0,.6)}
+  #toast.show{transform:translate(-50%,0);opacity:1}
+  #toast b{color:var(--ok)}
+
+  @media(max-width:900px){nav.menu{display:none}.search{max-width:none}}
+</style>
+</head>
+<body>
+
+<div class="ticker">
+  <div class="ticker-inner" id="tick">
+    <span>🛡️ <b>Nouveau vendeur vérifié</b> — « La Droguerie » rejoint le marché</span>
+    <span><b class="ok">FLASH SALE</b> — jusqu'à -40% sur toute la catégorie Psychedeliques</span>
+    <span>📦 Livraison gratuite dès <b>0,001 BTC</b> d'achat</span>
+    <span>🕯️ <b>VENICE</b> — le marché que les algorithmes ne trouvent pas</span>
+    <span>⚡ Uptime réseau : <b class="ok">99,42%</b> — 14 nœuds relayés</span>
+    <!-- duplicated for seamless loop -->
+    <span>🛡️ <b>Nouveau vendeur vérifié</b> — « La Droguerie » rejoint le marché</span>
+    <span><b class="ok">FLASH SALE</b> — jusqu'à -40% sur toute la catégorie Psychedeliques</span>
+    <span>📦 Livraison gratuite dès <b>0,001 BTC</b> d'achat</span>
+    <span>🕯️ <b>VENICE</b> — le marché que les algorithmes ne trouvent pas</span>
+    <span>⚡ Uptime réseau : <b class="ok">99,42%</b> — 14 nœuds relayés</span>
+  </div>
+</div>
+
+<header>
+  <div class="nav">
+    <a class="logo" href="#">
+      <div class="logo-mark">🕯️</div>
+      <div>VENICE<small>MARCHÉ CACHÉ</small></div>
+    </a>
+    <nav class="menu">
+      <a href="#" class="on">Marché</a>
+      <a href="#">Catégories</a>
+      <a href="#">Vendeurs</a>
+      <a href="#">Promos</a>
+      <a href="#">Forum</a>
+    </nav>
+    <div class="search"><input type="text" placeholder="Rechercher un produit, un vendeur…"></div>
+    <div class="iconbtn" title="Alertes">🔔<div class="dot"></div></div>
+    <div class="iconbtn cartbtn" title="Panier">🛒<span id="cartcount">0</span></div>
+    <div class="avatar" title="an0nym0us_dam">D</div>
+  </div>
+</header>
+
+<section class="hero">
+  <h1>Bienvenue à <em>VENICE</em>,<br>l'autre côté du miroir.</h1>
+  <p>Le marché clandestin où chaque transaction est anonyme, chaque vendeur escrowé, et chaque colis tracé jusqu'à la porte. Aucune base de données. Aucun journal. Aucune trace.</p>
+  <div class="stats">
+    <div class="stat"><div class="k">4 218<small>produits en ligne</small></div></div>
+    <div class="stat"><div class="k">1 932<small>vendeurs vérifiés</small></div></div>
+    <div class="stat"><div class="k">4,9★<small>note moyenne</small></div></div>
+    <div class="stat"><div class="k"><span class="live"></span>&nbsp; 347<small>acheteurs en ce moment</small></div></div>
+  </div>
+</section>
+
+<div class="chips" id="chips">\n  <div class="chip on" data-c="all">Tout</div>
+  <div class="chip" data-c="cann">🌿 Cannabis</div>
+  <div class="chip" data-c="mdma">💊 MDMA</div>
+  <div class="chip" data-c="lsd">🔮 LSD</div>
+  <div class="chip" data-c="psy">🍄 Psychedéliques</div>
+  <div class="chip" data-c="stim">⚡ Stimulants</div>
+  <div class="chip" data-c="dep">😴 Dépressifs</div>
+  <div class="chip" data-c="diss">🌀 Dissociatifs</div>
+</div>
+
+<main class="grid" id="grid">
+
+  <article class="card" data-cat="mdma">
+    <div class="thumb g-mdma"><span class="tag">MDMA</span><span class="fav">♡</span>💊</div>
+    <div class="body">
+      <div class="ttl">Ecstasy (MDMA) — 100 mg <span class="vf">✔</span></div>
+      <div class="vendor">par « Sacré Cœur »</div>
+      <div class="rating"><span class="stars">★★★★★</span>4,9 · 2 341 avis</div>
+      <div class="foot"><div class="price">6,20 €<small>≈ 0,0000568 BTC</small></div><button class="buy">+ Panier</button></div>
+    </div>
+  </article>
+
+  <article class="card" data-cat="cann">
+    <div class="thumb g-cann"><span class="tag">CANNABIS</span><span class="fav">♡</span>🌿</div>
+    <div class="body">
+      <div class="ttl">THC 2,5 g — « Rive Sud » <span class="vf">✔</span></div>
+      <div class="vendor">par « La Droguerie »</div>
+      <div class="rating"><span class="stars">★★★★★</span>4,8 · 4 102 avis</div>
+      <div class="foot"><div class="price">9,80 €<small>≈ 0,0000890 BTC</small></div><button class="buy">+ Panier</button></div>
+    </div>
+  </article>
+
+  <article class="card" data-cat="lsd">
+    <div class="thumb g-lsd"><span class="tag">LSD</span><span class="fav">♡</span>🔮</div>
+    <div class="body">
+      <div class="ttl">Acide — 100 µg, carnet de 20 <span class="vf">✔</span></div>
+      <div class="vendor">par « Miroir de Venise »</div>
+      <div class="rating"><span class="stars">★★★★☆</span>4,7 · 1 876 avis</div>
+      <div class="foot"><div class="price">74,00 €<small>≈ 0,000669 BTC</small></div><button class="buy">+ Panier</button></div>
+    </div>
+  </article>
+
+  <article class="card" data-cat="psy">
+    <div class="thumb g-psy"><span class="tag">PSYCHÉ</span><span class="fav">♡</span>🍄</div>
+    <div class="body">
+      <div class="ttl">Psilocybe cubensis — 3 g secs <span class="vf">✔</span></div>
+      <div class="vendor">par « Forêt Noire »</div>
+      <div class="rating"><span class="stars">★★★★★</span>5,0 · 987 avis</div>
+      <div class="foot"><div class="price">23,50 €<small>≈ 0,000213 BTC</small></div><button class="buy">+ Panier</button></div>
+    </div>
+  </article>
+
+  <article class="card" data-cat="stim">
+    <div class="thumb g-stim"><span class="tag">STIMULANT</span><span class="fav">♡</span>⚡</div>
+    <div class="body">
+      <div class="ttl">Cocaïne — poudre, 1 g <span class="vf">✔</span></div>
+      <div class="vendor">par « Banco di Roma »</div>
+      <div class="rating"><span class="stars">★★★★☆</span>4,6 · 3 218 avis</div>
+      <div class="foot"><div class="price">32,00 €<small>≈ 0,000290 BTC</small></div><button class="buy">+ Panier</button></div>
+    </div>
+  </article>
+
+  <article class="card" data-cat="stim">
+    <div class="thumb g-stim"><span class="tag">STIMULANT</span><span class="fav">♡</span>🧊</div>
+    <div class="body">
+      <div class="ttl">Méthamphétamine — cristal, 0,5 g <span class="vf">✔</span></div>
+      <div class="vendor">par « N°7 Anonyme »</div>
+      <div class="rating"><span class="stars">★★★★☆</span>4,5 · 1 540 avis</div>
+      <div class="foot"><div class="price">18,00 €<small>≈ 0,000163 BTC</small></div><button class="buy">+ Panier</button></div>
+    </div>
+  </article>
+
+  <article class="card" data-cat="psy">
+    <div class="thumb g-psy"><span class="tag">PSYCHÉ</span><span class="fav">♡</span>🌊</div>
+    <div class="body">
+      <div class="ttl">Ayahuasca — extrait liquide, 20 ml <span class="vf">✔</span></div>
+      <div class="vendor">par « Río Oscuro »</div>
+      <div class="rating"><span class="stars">★★★★★</span>4,9 · 764 avis</div>
+      <div class="foot"><div class="price">41,00 €<small>≈ 0,000371 BTC</small></div><button class="buy">+ Panier</button></div>
+    </div>
+  </article>
+
+  <article class="card" data-cat="diss">
+    <div class="thumb g-diss"><span class="tag">DISSOCIATIF</span><span class="fav">♡</span>🌀</div>
+    <div class="body">
+      <div class="ttl">Ketamine — 500 mg <span class="vf">✔</span></div>
+      <div class="vendor">par « Clinique Fantôme »</div>
+      <div class="rating"><span class="stars">★★★★☆</span>4,4 · 1 102 avis</div>
+      <div class="foot"><div class="price">27,50 €<small>≈ 0,000249 BTC</small></div><button class="buy">+ Panier</button></div>
+    </div>
+  </article>
+
+  <article class="card" data-cat="dep">
+    <div class="thumb g-dep"><span class="tag">DÉPRESSIF</span><span class="fav">♡</span>😴</div>
+    <div class="body">
+      <div class="ttl">Héroïne — 80 mg, encapsulée <span class="vf">✔</span></div>
+      <div class="vendor">par « L'Oubli »</div>
+      <div class="rating"><span class="stars">★★★★☆</span>4,6 · 2 053 avis</div>
+      <div class="foot"><div class="price">15,00 €<small>≈ 0,000136 BTC</small></div><button class="buy">+ Panier</button></div>
+    </div>
+  </article>
+
+  <article class="card" data-cat="mdma">
+    <div class="thumb g-mdma"><span class="tag">MDMA</span><span class="fav">♡</span>🧬</div>
+    <div class="body">
+      <div class="ttl">MDMA liquide — 25 ml <span class="vf">✔</span></div>
+      <div class="vendor">par « Sacré Cœur »</div>
+      <div class="rating"><span class="stars">★★★★★</span>4,8 · 1 322 avis</div>
+      <div class="foot"><div class="price">34,00 €<small>≈ 0,000308 BTC</small></div><button class="buy">+ Panier</button></div>
+    </div>
+  </article>
+
+  <article class="card" data-cat="diss">
+    <div class="thumb g-diss"><span class="tag">DISSOCIATIF</span><span class="fav">♡</span>🎭</div>
+    <div class="body">
+      <div class="ttl">DXM — 100 mg <span class="vf">✔</span></div>
+      <div class="vendor">par « Masque de Plomb »</div>
+      <div class="rating"><span class="stars">★★★★☆</span>4,3 · 618 avis</div>
+      <div class="foot"><div class="price">21,00 €<small>≈ 0,000190 BTC</small></div><button class="buy">+ Panier</button></div>
+    </div>
+  </article>
+
+  <article class="card" data-cat="stim">
+    <div class="thumb g-stim"><span class="tag">STIMULANT</span><span class="fav">♡</span>💉</div>
+    <div class="body">
+      <div class="ttl">Dextro — amphétamine, 300 mg <span class="vf">✔</span></div>
+      <div class="vendor">par « N°7 Anonyme »</div>
+      <div class="rating"><span class="stars">★★★★☆</span>4,5 · 934 avis</div>
+      <div class="foot"><div class="price">8,50 €<small>≈ 0,000077 BTC</small></div><button class="buy">+ Panier</button></div>
+    </div>
+  </article>
+
+  <article class="card" data-cat="psy">
+    <div class="thumb g-psy"><span class="tag">PSYCHÉ</span><span class="fav">♡</span>🫁</div>
+    <div class="body">
+      <div class="ttl">Dampê — 50 mg, dose pipette <span class="vf">✔</span></div>
+      <div class="vendor">par « Forêt Noire »</div>
+      <div class="rating"><span class="stars">★★★★★</span>4,9 · 445 avis</div>
+      <div class="foot"><div class="price">19,00 €<small>≈ 0,000172 BTC</small></div><button class="buy">+ Panier</button></div>
+    </div>
+  </article>
+
+  <article class="card" data-cat="stim">
+    <div class="thumb g-stim"><span class="tag">STIMULANT</span><span class="fav">♡</span>🧪</div>
+    <div class="body">
+      <div class="ttl">Benzodiazépines — diazépam, 10×10 mg <span class="vf">✔</span></div>
+      <div class="vendor">par « Clinique Fantôme »</div>
+      <div class="rating"><span class="stars">★★★★☆</span>4,7 · 1 780 avis</div>
+      <div class="foot"><div class="price">12,00 €<small>≈ 0,000109 BTC</small></div><button class="buy">+ Panier</button></div>
+    </div>
+  </article>
+
+  <article class="card" data-cat="dep">
+    <div class="thumb g-dep"><span class="tag">DÉPRESSIF</span><span class="fav">♡</span>🕳️</div>
+    <div class="body">
+      <div class="ttl">PCP — 50 mg <span class="vf">✔</span></div>
+      <div class="vendor">par « L'Oubli »</div>
+      <div class="rating"><span class="stars">★★★☆☆</span>3,9 · 312 avis</div>
+      <div class="foot"><div class="price">9,00 €<small>≈ 0,000082 BTC</small></div><button class="buy">+ Panier</button></div>
+    </div>
+  </article>
+
+  <article class="card" data-cat="cann">
+    <div class="thumb g-cann"><span class="tag">CANNABIS</span><span class="fav">♡</span>🍫</div>
+    <div class="body">
+      <div class="ttl">Bonbon THC/CBD 10/10 mg <span class="vf">✔</span></div>
+      <div class="vendor">par « La Droguerie »</div>
+      <div class="rating"><span class="stars">★★★★☆</span>4,6 · 2 460 avis</div>
+      <div class="foot"><div class="price">4,50 €<small>≈ 0,000041 BTC</small></div><button class="buy">+ Panier</button></div>
+    </div>
+  </article>
+
+  <article class="card" data-cat="lsd">
+    <div class="thumb g-lsd"><span class="tag">LSD</span><span class="fav">♡</span>✨</div>
+    <div class="body">
+      <div class="ttl">4-ACO — 250 mg, dose unique <span class="vf">✔</span></div>
+      <div class="vendor">par « Miroir de Venise »</div>
+      <div class="rating"><span class="stars">★★★★☆</span>4,5 · 288 avis</div>
+      <div class="foot"><div class="price">26,00 €<small>≈ 0,000235 BTC</small></div><button class="buy">+ Panier</button></div>
+    </div>
+  </article>
+
+  <article class="card" data-cat="psy">
+    <div class="thumb g-psy"><span class="tag">PSYCHÉ</span><span class="fav">♡</span>🧿</div>
+    <div class="body">
+      <div class="ttl">DMT — extrait pur, 150 mg <span class="vf">✔</span></div>
+      <div class="vendor">par « Río Oscuro »</div>
+      <div class="rating"><span class="stars">★★★★★</span>4,8 · 531 avis</div>
+      <div class="foot"><div class="price">68,00 €<small>≈ 0,000615 BTC</small></div><button class="buy">+ Panier</button></div>
+    </div>
+  </article>
+
+  <article class="card" data-cat="stim">
+    <div class="thumb g-stim"><span class="tag">STIMULANT</span><span class="fav">♡</span>🔥</div>
+    <div class="body">
+      <div class="ttl">Bath salts — MDPV, 150 mg <span class="vf">✔</span></div>
+      <div class="vendor">par « Banco di Roma »</div>
+      <div class="rating"><span class="stars">★★★☆☆</span>4,1 · 402 avis</div>
+      <div class="foot"><div class="price">16,00 €<small>≈ 0,000145 BTC</small></div><button class="buy">+ Panier</button></div>
+    </div>
+  </article>
+
+</main>
+
+<footer>
+  <div class="fwrap">
+    <div class="fcol" style="max-width:340px">
+      <div class="logo" style="margin-bottom:14px"><div class="logo-mark">🕯️</div><div>VENICE<small>MARCHÉ CACHÉ</small></div></div>
+      <div class="disc">VENICE est un marché clandestin hébergé sur un réseau autonome. Tous les paiements sont anonymes, toutes les transactions passent par un escrow. Le marché n'est responsable ni de la pureté des produits, ni des conséquences de leur consommation.</div>
+    </div>
+    <div class="fcol"><h4>Marché</h4><a href="#">Catégories</a><a href="#">Meilleures ventes</a><a href="#">Nouveautés</a><a href="#">En stock</a></div>
+    <div class="fcol"><h4>Vendeur</h4><a href="#">Devenir vendeur</a><a href="#">Dépôt escrow</a><a href="#">Commission : 2%</a><a href="#">Documentation</a></div>
+    <div class="fcol"><h4>Paye en</h4>
+      <div class="pay"><span>₿ BTC</span><span>Ł LTC</span><span>Ξ ETH</span><span>◈ XMR</span><span>₮ TON</span></div>
+      <h4 style="margin-top:22px">Réseau</h4><a href="#">États des nœuds</a><a href="#">Relais Tor</a><a href="#">API publique</a>
+    </div>
+  </div>
+  <div class="fbottom">VENICE © 2026 — aucune base de données, aucun journal, aucune trace · <span style="color:var(--acc2)">build « canal-nord »</span></div>
+</footer>
+
+<div id="toast"><b>✔</b><span id="toasttxt">Produit ajouté au panier</span></div>
+
+<script>
+  const cards = [...document.querySelectorAll('.card')];
+  const chips = [...document.querySelectorAll('.chip')];
+
+  chips.forEach(ch => ch.addEventListener('click', () => {
+    chips.forEach(c => c.classList.remove('on'));
+    ch.classList.add('on');
+    const c = ch.dataset.c;
+    cards.forEach(card => card.style.display = (c === 'all' || card.dataset.cat === c) ? '' : 'none'));
+  }));
+
+  let cart = 0;
+  const toast = document.getElementById('toast');
+  const toasttxt = document.getElementById('toasttxt');
+  let tmo;
+  function showToast(msg){
+    toasttxt.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(tmo);
+    tmo = setTimeout(() => toast.classList.remove('show'), 2200);
+  }
+
+  cards.forEach(card => {
+    card.querySelector('.buy').addEventListener('click', e => {
+      e.stopPropagation();
+      cart++;
+      document.getElementById('cartcount').textContent = cart;
+      showToast(document.querySelector(card.querySelector('.ttl').outerHTML ? '' : '') || '') ||
+      showToast('« ' + card.querySelector('.ttl').childNodes[0].textContent.trim() + ' » ajouté au panier — transaction escrow prête');
+    });
+    card.querySelector('.fav').addEventListener('click', function(e){
+      e.stopPropagation();
+      const on = this.textContent.trim() === '♥';
+      this.textContent = on ? '♡' : '♥';
+      this.style.color = on ? '' : 'var(--bad)';
+      showToast(on ? 'Retiré des favoris' : 'Ajouté aux favoris');
+    });
+  });
+
+  // compteur live acheteurs
+  const live = document.querySelector('.stat:last-child .k small');
+  setInterval(() => {
+    let n = 300 + Math.floor(Math.random()*120);
+    live.textContent = n + ' acheteurs en ce moment';
+  }, 4000);
+</script>
+</body>
+</html>
